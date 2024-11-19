@@ -13,7 +13,7 @@ const Header = () => {
 
         {/* GitHub Link */}
         <a
-          href="https://github.com/your-username/your-repo"
+          href="https://github.com/PRAVEEN200307/userbank"
           target="_blank"
           rel="noopener noreferrer"
           className="text-white hover:text-gray-200 transition"

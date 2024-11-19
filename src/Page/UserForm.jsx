@@ -1,10 +1,22 @@
+import axios from "axios";
+
 export default function UserForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
     const data = Object.fromEntries(formData);
-    console.log(data);
+  
+
+    try {
+      axios.post("https://userbankexpress.onrender.com/", data);
+      alert('Your data save successfully')
+    } catch (err) {
+      console.log(err);
+    }
+
+    form.reset()
+
   };
 
   return (

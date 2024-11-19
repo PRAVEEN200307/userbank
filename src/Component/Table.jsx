@@ -1,42 +1,76 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export default function Table() {
+  const [logindata, setLoginData] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userAge, setUserAge] = useState("");
+  const [id, setId] = useState("");
+
+  useEffect(() => {
+    getAllData();
+  });
+
+  async function getAllData() {
+    const data = await axios.get("https://userbankexpress.onrender.com");
+    setLoginData(data.data);
+  }
+
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
   };
 
-  const FomData = [
-    {
-      UserName: "Rajesh",
-      UserEmail: "xigaq@mailinator.com",
-      UserAge: "33",
-    },
-    {
-      UserName: "dhinesh",
-      UserEmail: "xigaq@mailinator.com",
-      UserAge: "18",
-    },
-    {
-      UserName: "praveen",
-      UserEmail: "xigaq@mailinator.com",
-      UserAge: "23",
-    },
-    {
-      UserName: "savitha",
-      UserEmail: "xigaq@mailinator.com",
-      UserAge: "28",
-    },
-  ];
-
-  const UpdateForm = () => {
-    console.log("clicked");
+  const UpdateForm = (id) => {
+    console.log("clicked", id);
+    setId(id);
     setIsOpen(!isOpen);
+
+    const filereddata = logindata.find((value) => value._id == id);
+    const { UserName, UserEmail, UserAge } = filereddata;
+    setUserName(UserName);
+    setUserEmail(UserEmail);
+    setUserAge(UserAge);
   };
 
+  const handleDelect = async (id) => {
+    try {
+      const sure = confirm("Are you sure you want to delete?");
+      if (sure == true) {
+        await axios.delete(`https://userbankexpress.onrender.com/${id}`);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
- 
+  const handleName = (e) => {
+    setUserName(e.target.value);
+  };
+  const handleEmail = (e) => {
+    setUserEmail(e.target.value);
+  };
+  const handleAge = (e) => {
+    setUserAge(e.target.value);
+  };
+
+  const handleUpdate = async (e) => {
+    console.log(id);
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    const updateData = Object.fromEntries(data);
+
+    try {
+      const reoson =  await axios.put(`https://userbankexpress.onrender.com/${id}`, updateData);
+      console.log(reoson)
+      toggleModal()
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <>
@@ -52,20 +86,23 @@ export default function Table() {
               </tr>
             </thead>
             <tbody>
-              {FomData.map((data, index) => {
+              {logindata.map((data, index) => {
                 return (
                   <tr key={index} className="border-b border-gray-200">
-                    <td className="px-6 py-4">example.txt</td>
-                    <td className="px-6 py-4">25</td>
-                    <td className="px-6 py-4">example@example.com</td>
+                    <td className="px-6 py-4"> {data.UserName} </td>
+                    <td className="px-6 py-4"> {data.UserAge} </td>
+                    <td className="px-6 py-4"> {data.UserEmail} </td>
                     <td className="px-6 py-4">
                       <button
                         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none"
-                        onClick={UpdateForm}
+                        onClick={() => UpdateForm(data._id)}
                       >
                         Update
                       </button>
-                      <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none ml-2">
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none ml-2"
+                        onClick={() => handleDelect(data._id)}
+                      >
                         Delete
                       </button>
                     </td>
@@ -76,8 +113,6 @@ export default function Table() {
           </table>
         </div>
       </div>
-
-
 
       {/* update Form */}
       {isOpen && (
@@ -95,7 +130,7 @@ export default function Table() {
               Update User Details
             </h2>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleUpdate}>
               <div>
                 <label
                   htmlFor="userName"
@@ -108,21 +143,27 @@ export default function Table() {
                   id="userName"
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="Enter your name"
+                  value={userName}
+                  name="UserName"
+                  onChange={handleName}
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="userEmail"
+                  htmlFor="UserEmail"
                   className="block text-gray-700 font-medium mb-1"
                 >
-                  Email
+                  Email 
                 </label>
                 <input
                   type="email"
                   id="userEmail"
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="Enter your email"
+                  value={userEmail}
+                  name="UserEmail"
+                  onChange={handleEmail}
                 />
               </div>
 
@@ -138,6 +179,9 @@ export default function Table() {
                   id="userAge"
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   placeholder="Enter your age"
+                  value={userAge}
+                  name="UserAge"
+                  onChange={handleAge}
                 />
               </div>
 
